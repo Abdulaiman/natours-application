@@ -1,64 +1,33 @@
-const fs = require('fs');
 const express = require('express');
 const app = express();
+const morgan = require('morgan');
+const tourRouter = require('./routes/tour-routes');
+const userRouter = require('./routes/user-routes');
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 app.use(express.json());
-// app.get('/', (req, res) => {
-//   res
-//     .status(200)
-//     .json({ message: 'hello from the server side', app: 'Natours' });
-// });
-// app.post('/', (req, res) => {
-//   res.status(200).send('you can post on this end point');
-// });
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
-);
-app.get('/api/v1/tours', (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    results: tours.length,
-    data: {
-      tours,
-    },
-  });
-});
-app.get(`/api/v1/tours/:id`, (req, res) => {
-  const id = +req.params.id;
-  if (id > tours.length) {
-    return res.status(404).json({
-      status: 'failed',
-      message: 'invalid id',
-    });
-  }
-  const tour = tours.find((tour) => tour.id === id);
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
-});
-app.post('/api/v1/tours', (req, res) => {
-  // console.log(req.body);
-  const newId = tours[tours.length - 1].id + 1;
-  const newTour = Object.assign({ id: newId }, req.body);
 
-  tours.push(newTour);
+app.use(express.static(`${__dirname}/public`));
 
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      res.status(201).json({
-        status: 'success',
-        data: {
-          tour: newTour,
-        },
-      });
-    }
-  );
+app.use((req, res, next) => {
+  console.log('hello from the middle ware ():?)');
+  next();
 });
-const port = 3000;
-app.listen(port, () => {
-  console.log('App running on port 3000....');
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
 });
+///////
+
+///////
+//////
+//////
+/////
+/////
+/////
+
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
+module.exports = app;
+// npm i eslint prettier eslint-config-prettier eslint-plugin-prettier eslint-config-airbnb eslint-plugin-node eslint-plugin-import eslint-plugin-jsx-a11y eslint-plugin-react --save-dev
