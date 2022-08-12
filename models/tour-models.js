@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const validator = require('validator');
+// const validator = require('validator');
+// const User = require('./user-module');
+
 const tourSchema = new mongoose.Schema(
   {
     name: {
@@ -36,7 +38,7 @@ const tourSchema = new mongoose.Schema(
       type: String,
       required: [true, 'a Tour must have a difficulty'],
       enum: {
-        values: ['easy', 'medium', 'hard'],
+        values: ['easy', 'medium', 'difficult'],
         message: 'Difficulty is either easy, medium or hard',
       },
     },
@@ -76,6 +78,36 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       dafault: false,
     },
+    startLocation: {
+      ///GeoJSON
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        ///GeoJSON
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+      },
+    ],
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   {
     toJSON: { virtuals: true },
@@ -91,6 +123,14 @@ tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
 });
+//// INCASE YOU WANTU USE EMBEDDING
+// tourSchema.pre('save', async function (next) {
+//   const guidesPromises = this.guides.map(async (id) => await User.findById(id));
+//   this.guides = await Promise.all(guidesPromises);
+
+//   next();
+// });
+
 // tourSchema.pre('save', function (next) {
 //   console.log('will save a document to the dataBase');
 //   next();
@@ -108,12 +148,20 @@ tourSchema.pre(/^find/, function (next) {
   this.start = Date.now();
   next();
 });
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
+  next();
+});
 tourSchema.post(/^find/, function (docs, next) {
   // tourSchema.pre('find', function (next) {
   console.log(Date.now() - this.start);
   this.find({ secretTour: { $ne: true } });
   next();
 });
+
 ////// AGGREGATION SCHEMA
 tourSchema.pre('aggregate', function (next) {
   this.pipeline().unshift({

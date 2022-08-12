@@ -14,6 +14,20 @@ const signToken = (id) =>
 const createAndSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
 
+  const cookieOptions = {
+    ////SET THE EXPIRY DATE OF THE COOKIE FROM THE BROWSER
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    ////MAKE IT WORK FOR ONLY HTTPS REQUESTS
+    // secure: true,
+    /////MAKE THE PAYLOAD UNMODEFIABLE
+    httpOnly: true,
+  };
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+  res.cookie('jwt', token, cookieOptions);
+  /// remove password from the output... but since we didn't save it is still in our database
+  user.password = undefined;
   res.status(statusCode).json({
     status: 'success',
     token,
@@ -37,9 +51,9 @@ exports.signUp = catchAsync(async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
-
   ////CHECK IF EMAIL AND PASSWORD EXIST
-  if (!email || !password) {
+  console.log(email, password);
+  if (!email || !password || email === {}) {
     return next(new AppError('please provide email and password'), 400);
   }
   ////CHECK IF EMAIL EXIST IN DATABASE
