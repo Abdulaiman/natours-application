@@ -9,6 +9,7 @@ const morgan = require('morgan');
 const globalErrorHandler = require('./controllers/error-controller');
 const tourRouter = require('./routes/tour-routes');
 const userRouter = require('./routes/user-routes');
+const reviewRouter = require('./routes/review-routes');
 const AppError = require('./utils/app-error');
 
 ///// GLOBAL MIDDLEWARE
@@ -73,6 +74,7 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 ///// ROUTE HANDLEr FOR UNDEFINED ROUTE
 app.all('*', (req, res, next) => {

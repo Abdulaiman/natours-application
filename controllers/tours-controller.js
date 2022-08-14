@@ -2,6 +2,13 @@ const Tour = require('./../models/tour-models');
 const ApiFeatures = require('../utils/api-Features');
 const catchAsync = require('../utils/catch-async');
 const AppError = require('../utils/app-error');
+const {
+  deleteOne,
+  updateOne,
+  createOne,
+  getOne,
+  getAll,
+} = require('./handler-factory');
 
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';
@@ -11,123 +18,129 @@ exports.aliasTopTours = (req, res, next) => {
 };
 
 ///////////////////////?********REFACTORED********??????????????////////////
+exports.getAllTours = getAll(Tour);
+// exports.getAllTours = catchAsync(async (req, res, next) => {
+////// build the query
+///FILTERING
+// const queryObj = { ...req.query };
+// const excludedFields = ['page', 'sort', 'limit', 'fields'];
+// excludedFields.forEach((el) => delete queryObj[el]);
 
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  ////// build the query
-  ///FILTERING
-  // const queryObj = { ...req.query };
-  // const excludedFields = ['page', 'sort', 'limit', 'fields'];
-  // excludedFields.forEach((el) => delete queryObj[el]);
+// /////  ADVANCED FILTERING
+// let queryString = JSON.stringify(queryObj);
+// queryString = queryString.replace(
+//   /\b(gte|gt|lte|lt)\b/g,
+//   (match) => `$${match}`
+// );
+// let query = Tour.find(JSON.parse(queryString));
+///
+//////SORTING
+//
+// if (req.query.sort) {
+//   const sortBy = req.query.sort.split(',').join(' ');
+//   query = query.sort(sortBy);
+// } else {
+//   query = query.sort('-createdAt');
+// }
+/////
+//FIELD LIMITING
+//
+// if (req.query.fields) {
+//   const fields = req.query.fields.split(',').join(' ');
+//   query = query.select(fields);
+// } else {
+//   query = query.select('-__v');
+// }
+/////
+/////PAGINATION
+//////
+// const page = +req.query.page || 1;
+// const limit = +req.query.limit || 100;
+// const skip = (page - 1) * limit;
+// query = query.skip(skip).limit(limit);
+// if (req.query.page) {
+//   const numOfTours = await Tour.countDocuments();
+//   if (skip >= numOfTours) throw new Error('This page does not exist');
+// }
 
-  // /////  ADVANCED FILTERING
-  // let queryString = JSON.stringify(queryObj);
-  // queryString = queryString.replace(
-  //   /\b(gte|gt|lte|lt)\b/g,
-  //   (match) => `$${match}`
-  // );
-  // let query = Tour.find(JSON.parse(queryString));
-  ///
-  //////SORTING
-  //
-  // if (req.query.sort) {
-  //   const sortBy = req.query.sort.split(',').join(' ');
-  //   query = query.sort(sortBy);
-  // } else {
-  //   query = query.sort('-createdAt');
-  // }
-  /////
-  //FIELD LIMITING
-  //
-  // if (req.query.fields) {
-  //   const fields = req.query.fields.split(',').join(' ');
-  //   query = query.select(fields);
-  // } else {
-  //   query = query.select('-__v');
-  // }
-  /////
-  /////PAGINATION
-  //////
-  // const page = +req.query.page || 1;
-  // const limit = +req.query.limit || 100;
-  // const skip = (page - 1) * limit;
-  // query = query.skip(skip).limit(limit);
-  // if (req.query.page) {
-  //   const numOfTours = await Tour.countDocuments();
-  //   if (skip >= numOfTours) throw new Error('This page does not exist');
-  // }
+// {difficulty: 'easy', duration: {$gte: 5}}
+//{ difficulty: 'easy', duration: { gte: '5' } }
+// const tours = await Tour.find()
+//   .where('duration')
+//   .equals(5)
+//   .where('difficulty')
+//   .equals('easy');
+/////// execute the Query
+//   const features = new ApiFeatures(Tour.find(), req.query)
+//     .filter()
+//     .sort()
+//     .limitFields()
+//     .paginate();
+//   const tours = await features.query;
+//   //// SEND RESPONSE
+//   res.status(200).json({
+//     status: 'success',
+//     results: tours.length,
+//     data: {
+//       tours,
+//     },
+//   });
+// });
+exports.getTour = getOne(Tour, { path: 'reviews' });
+// exports.getTour = catchAsync(async (req, res, next) => {
+//   const { id } = req.params;
+//   const tour = await Tour.findById(id).populate('reviews');
+//   if (!tour) {
+//     return next(new AppError('No tour found with that id', 404));
+//   }
+//   res.status(200).json({
+//     status: 'success',
+//     data: {
+//       tour,
+//     },
+//   });
+// });
 
-  // {difficulty: 'easy', duration: {$gte: 5}}
-  //{ difficulty: 'easy', duration: { gte: '5' } }
-  // const tours = await Tour.find()
-  //   .where('duration')
-  //   .equals(5)
-  //   .where('difficulty')
-  //   .equals('easy');
-  /////// execute the Query
-  const features = new ApiFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
-  const tours = await features.query;
-  //// SEND RESPONSE
-  res.status(200).json({
-    status: 'success',
-    results: tours.length,
-    data: {
-      tours,
-    },
-  });
-});
-exports.getTour = catchAsync(async (req, res, next) => {
-  const { id } = req.params;
-  const tour = await Tour.findById(id);
-  if (!tour) {
-    return next(new AppError('No tour found with that id', 404));
-  }
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
-});
+exports.createTour = createOne(Tour);
+// exports.createTour = catchAsync(async (req, res, next) => {
+//   const newTour = await Tour.create(req.body);
+//   res.status(201).json({
+//     status: 'success',
+//     data: {
+//       tour: newTour,
+//     },
+//   });
+// });
 
-exports.createTour = catchAsync(async (req, res, next) => {
-  const newTour = await Tour.create(req.body);
-  res.status(201).json({
-    status: 'success',
-    data: {
-      tour: newTour,
-    },
-  });
-});
-exports.updateTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-  if (!tour) {
-    return next(new AppError('No tour found with that id', 404));
-  }
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
-});
-exports.deleteTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndDelete(req.params.id);
+exports.updateTour = updateOne(Tour);
+// exports.updateTour = catchAsync(async (req, res, next) => {
+//   const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+//     new: true,
+//     runValidators: true,
+//   });
+//   if (!tour) {
+//     return next(new AppError('No tour found with that id', 404));
+//   }
+//   res.status(200).json({
+//     status: 'success',
+//     data: {
+//       tour,
+//     },
+//   });
+// });
 
-  if (!tour) {
-    return next(new AppError('No tour found with that id', 404));
-  }
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
-});
+exports.deleteTour = deleteOne(Tour);
+// exports.deleteTour = catchAsync(async (req, res, next) => {
+//   const tour = await Tour.findByIdAndDelete(req.params.id);
+
+//   if (!tour) {
+//     return next(new AppError('No tour found with that id', 404));
+//   }
+//   res.status(204).json({
+//     status: 'success',
+//     data: null,
+//   });
+// });
 
 //
 exports.getTourStats = catchAsync(async (req, res, next) => {
