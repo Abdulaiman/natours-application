@@ -52,8 +52,8 @@ exports.signUp = catchAsync(async (req, res, next) => {
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
   ////CHECK IF EMAIL AND PASSWORD EXIST
-  console.log(email, password);
-  if (!email || !password || email === {}) {
+  // console.log(email, password);
+  if (!email || !password) {
     return next(new AppError('please provide email and password'), 400);
   }
   ////CHECK IF EMAIL EXIST IN DATABASE
@@ -104,8 +104,9 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.restrictTo = (...roles) => {
-  return (req, res, next) => {
+exports.restrictTo =
+  (...roles) =>
+  (req, res, next) => {
     ////roles [admin, leadAdmin].
 
     if (!roles.includes(req.user.role)) {
@@ -116,7 +117,6 @@ exports.restrictTo = (...roles) => {
 
     next();
   };
-};
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   //// get user based on pasted email
