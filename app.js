@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const app = express();
 const helmet = require('helmet');
@@ -10,8 +11,11 @@ const globalErrorHandler = require('./controllers/error-controller');
 const tourRouter = require('./routes/tour-routes');
 const userRouter = require('./routes/user-routes');
 const reviewRouter = require('./routes/review-routes');
+const viewRouter = require('./routes/view-routes');
 const AppError = require('./utils/app-error');
 
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
 ///// GLOBAL MIDDLEWARE
 /// SET SECURITY HTTP HEADERS
 app.use(helmet());
@@ -72,6 +76,7 @@ app.use((req, res, next) => {
 /////
 /////
 
+app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
