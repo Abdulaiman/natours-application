@@ -166,12 +166,12 @@ tourSchema.pre(/^find/, function (next) {
   });
   next();
 });
-tourSchema.post(/^find/, function (docs, next) {
-  // tourSchema.pre('find', function (next) {
-  console.log(Date.now() - this.start);
-  this.find({ secretTour: { $ne: true } });
-  next();
-});
+// tourSchema.post(/^find/, function (docs, next) {
+//   // tourSchema.pre('find', function (next) {
+//   console.log(Date.now() - this.start);
+//   this.find({ secretTour: { $ne: true } });
+//   next();
+// });
 
 ////// AGGREGATION SCHEMA
 // tourSchema.pre('aggregate', function (next) {

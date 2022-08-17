@@ -1,11 +1,13 @@
 const path = require('path');
 const express = require('express');
+
 const app = express();
 const helmet = require('helmet');
-const mongoSanitize = require('express-mongo-sanitize');
+// const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
 const globalErrorHandler = require('./controllers/error-controller');
@@ -71,6 +73,8 @@ app.use(
 );
 ////serving static files
 app.use(express.static(`${__dirname}/public`));
+
+app.use(compression());
 ///// test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
