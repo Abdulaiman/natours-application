@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
 const globalErrorHandler = require('./controllers/error-controller');
@@ -20,6 +21,13 @@ app.set('views', path.join(__dirname, 'views'));
 /// SET SECURITY HTTP HEADERS
 app.use(helmet());
 
+// app.use((req, res, next) => {
+//   res.setHeader(
+//     'Content-Security-Policy',
+//     "script-src 'self' https://cdnjs.cloudflare.com"
+//   );
+//   next();
+// });
 //// DEVELOPMENT LOGGINF
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -38,6 +46,8 @@ app.use(
     limit: '10kb',
   })
 );
+
+app.use(cookieParser());
 
 //// data sanitization against noSQL query injection
 
@@ -64,6 +74,7 @@ app.use(express.static(`${__dirname}/public`));
 ///// test middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  console.log(req.cookie);
   next();
 });
 
