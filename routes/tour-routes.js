@@ -21,6 +21,11 @@ const router = express.Router();
 router.use('/:tourId/reviews', reviewRouter);
 
 router.route('/top-5-cheap').get(aliasTopTours, getAllTours);
+router.route('/hello-world').get((req, res, next) => {
+  res.status(200).json({
+    status: 'success',
+  });
+});
 router
   .route('/monthly-plan/:year')
   .get(protect, restrictTo('admin', 'lead-guide', 'guide'), getMonthlyPlan);
