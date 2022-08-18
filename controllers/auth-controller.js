@@ -11,7 +11,7 @@ const signToken = (id) =>
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
-const createAndSendToken = (user, statusCode, res) => {
+const createAndSendToken = (user, statusCode, res, req) => {
   const token = signToken(user._id);
 
   const cookieOptions = {
@@ -23,8 +23,9 @@ const createAndSendToken = (user, statusCode, res) => {
     // secure: true,
     /////MAKE THE PAYLOAD UNMODEFIABLE
     httpOnly: true,
+    secure: req.secure || req.headers('x-forwarded-proto') === 'https',
   };
-  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
   res.cookie('jwt', token, cookieOptions);
   /// remove password from the output... but since we didn't save it is still in our database
   user.password = undefined;
@@ -46,7 +47,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
     passwordChangedAt: req.body.passwordChangedAt,
     role: req.body.role,
   });
-  createAndSendToken(newUser, 201, res);
+  createAndSendToken(newUser, 201, res, req);
 });
 
 exports.login = async (req, res, next) => {
@@ -66,7 +67,7 @@ exports.login = async (req, res, next) => {
     return next(new AppError('incorrect email or password', 401));
   }
   /////EVERYTHING"S OKAY
-  createAndSendToken(user, 200, res);
+  createAndSendToken(user, 200, res, req);
 };
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -204,7 +205,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   ////update the changedPasswordAt property
 
   ////log the user
-  createAndSendToken(user, 200, res);
+  createAndSendToken(user, 200, res, req);
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -221,5 +222,5 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   await user.save();
 
   /// LOG USER IN SEND JTW
-  createAndSendToken(user, 200, res);
+  createAndSendToken(user, 200, res, req);
 });

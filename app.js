@@ -17,6 +17,8 @@ const reviewRouter = require('./routes/review-routes');
 const viewRouter = require('./routes/view-routes');
 const AppError = require('./utils/app-error');
 
+app.enable('trust proxy');
+
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 ///// GLOBAL MIDDLEWARE
